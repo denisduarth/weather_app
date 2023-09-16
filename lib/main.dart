@@ -14,12 +14,13 @@ class WheaterApp extends StatelessWidget {
             backgroundColor: Color(0xff255AF4),
             body: SafeArea(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   Text("São José do Rio Preto", style: titleStyle),
                   
                   Container(
                     height: 234,
-                    margin: EdgeInsets.only(top: 53),
+                    margin: EdgeInsets.only(top: 53, bottom: 24),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
