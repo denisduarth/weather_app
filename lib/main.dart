@@ -20,7 +20,6 @@ class WheaterApp extends StatelessWidget {
                   
                   Container(
                     height: 234,
-                    margin: EdgeInsets.only(top: 53, bottom: 24),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -37,7 +36,6 @@ class WheaterApp extends StatelessWidget {
                   
                   Container(
                     height: 70,
-                    margin: EdgeInsets.only(top: 71),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -71,7 +69,6 @@ class WheaterApp extends StatelessWidget {
                   
                   Container(
                     height: 100,
-                    margin: EdgeInsets.only(top: 98),
                     child: Expanded(
                       child: ListView(
                         scrollDirection: Axis.horizontal,
