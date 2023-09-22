@@ -2,103 +2,157 @@
 
 import 'package:flutter/material.dart';
 import 'style.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
 void main() => runApp(WheaterApp());
 
-//Classe WeatherApp
+/*
+  https://api.weatherapi.com
+  
+  /v1/forecast.json
+  
+  ?key=81134a81c96740db958105843232808&q=-20.8,-49.38
+*/
+
 class WheaterApp extends StatelessWidget {
+  var queryParams = {
+    'key': 'f62377c9fa074792b5f185658232209',
+    'q': '-20.8,-49.38',
+    'lang': 'pt',
+  };
+
+  Future<Map<String, dynamic>?> loadWeatherData() async {
+    var url = Uri.https('api.weatherapi.com', '/v1/forecast.json', queryParams);
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      var json = convert.jsonDecode(response.body) as Map<String, dynamic>;
+      return json;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-            backgroundColor: Color(0xff255AF4),
-            body: SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Text("São José do Rio Preto", style: titleStyle),
-                  
-                  Container(
-                    height: 234,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          child: Image.asset('images/01_sunny_color.png'),
-                          width: 96,
-                          height: 96,
-                        ),
-                        Text("Ensolarado", style: titleStyle),
-                        Text("33°", style: degreeStyle33),
-                      ],
-                    ),
-                  ),
-                  
-                  Container(
-                    height: 70,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Image.asset('images/humidity.png', height: 30, width: 30,),
-                            Text("HUMIDITY", style: textTemperatureStyle),
-                            Text("52%", style: textTemperatureStyle),
-                          ],
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children:[
-                            Image.asset('images/wind.png', height: 30, width: 30,),
-                            Text("WIND", style: textTemperatureStyle),
-                            Text("19km/h", style: textTemperatureStyle),
-                          ],
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Image.asset('images/feels_like.png', height: 30, width: 30,),
-                            Text("FEELS LIKE", style: textTemperatureStyle),
-                            Text("24°", style: textTemperatureStyle),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  Container(
-                    height: 100,
-                    child: Expanded(
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
+      home: Scaffold(
+        backgroundColor: Color(0xff255AF4),
+        body: FutureBuilder<Map<String, dynamic>?>(
+            future: loadWeatherData(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return CircularProgressIndicator();
+              }
+
+              var dados = snapshot.data;
+              var forecastday =
+                  dados?['forecast']['forecastday'][0]['hour'] as List<dynamic>;
+
+              return SafeArea(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(dados?['location']['name'], style: titleStyle),
+                    Container(
+                      height: 234,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ForecastDay('10AM', '03_cloud_color', 11.7),
-                          ForecastDay('11AM', '04_sun_cloudy_color', 17),
-                          ForecastDay('Now', '01_sunny_color', 33),
-                          ForecastDay('1PM', '04_sun_cloudy_color', 23.4),
-                          ForecastDay('2PM', '11_heavy_rain_color', 18),
-                          ForecastDay('3PM', '03_cloud_color', 15),
-                          ForecastDay('Now', '03_cloud_color', 11.7),
-                          ForecastDay('Now', '03_cloud_color', 11.7),
-                          ForecastDay('Now', '03_cloud_color', 11.7),
-                          ForecastDay('Now', '03_cloud_color', 11.7),
+                          Container(
+                            child: Image.network(
+                                '${dados?['current']['condition']['icon']}'),
+                            width: 96,
+                            height: 96,
+                          ),
+                          Text(dados?['current']['condition']['text'],
+                              style: titleStyle),
+                          Text("${dados!['current']['temp_c']}°C",
+                              style: degreeStyle33),
                         ],
                       ),
                     ),
-                  )
-                ],
-              ),
-            )));
+                    Container(
+                      height: 70,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Image.asset(
+                                'images/humidity.png',
+                                height: 30,
+                                width: 30,
+                              ),
+                              Text("HUMIDITY", style: textTemperatureStyle),
+                              Text("${dados['current']['humidity']}%",
+                                  style: textTemperatureStyle),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Image.asset(
+                                'images/wind.png',
+                                height: 30,
+                                width: 30,
+                              ),
+                              Text("WIND", style: textTemperatureStyle),
+                              Text("${dados['current']['wind_kph']}Km/h",
+                                  style: textTemperatureStyle),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Image.asset(
+                                'images/feels_like.png',
+                                height: 30,
+                                width: 30,
+                              ),
+                              Text("FEELS LIKE", style: textTemperatureStyle),
+                              Text("${dados['current']['feelslike_c']}°",
+                                  style: textTemperatureStyle),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      height: 100,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: forecastday
+                            .map(
+                              (item) => ForecastDay(
+                                item['time_epoch'],
+                                'ensolaradokkk',
+                                item['temp_c'],
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+      ),
+    );
   }
 }
 
 class ForecastDay extends StatelessWidget {
-  String hour;
+  int timeEpoch;
   String image;
   double temperature;
+  String? hour;
 
-  ForecastDay(this.hour, this.image, this.temperature);
+  ForecastDay(this.timeEpoch, this.image, this.temperature) {
+    var data = DateTime.fromMillisecondsSinceEpoch(timeEpoch);
+    hour = data.hour.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +166,7 @@ class ForecastDay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                hour,
+                hour!,
                 style: topTextStyle,
               ),
               Image.asset(
