@@ -39,118 +39,120 @@ class WheaterApp extends StatelessWidget {
       home: Scaffold(
         backgroundColor: Color(0xff255AF4),
         body: FutureBuilder<Map<String, dynamic>?>(
-            future: loadWeatherData(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return CircularProgressIndicator();
-              }
+          future: loadWeatherData(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return CircularProgressIndicator();
+            }
 
-              var dados = snapshot.data;
-              var forecastday =
-                  dados?['forecast']['forecastday'][0]['hour'] as List<dynamic>;
+            var dados = snapshot.data;
+            var forecastday =
+                dados?['forecast']['forecastday'][0]['hour'] as List<dynamic>;
 
-              return SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text(dados?['location']['name'], style: titleStyle),
-                    Container(
-                      height: 234,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            child: Image.network(
-                                '${dados?['current']['condition']['icon']}'),
-                            width: 100,
-                            height: 100,
-                          ),
-                          Text(dados?['current']['condition']['text'],
-                              style: titleStyle),
-                          Text("${dados!['current']['temp_c']}°C",
-                              style: degreeStyle33),
-                        ],
-                      ),
+            return SafeArea(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(dados?['location']['name'], style: titleStyle),
+                  Container(
+                    height: 234,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          child: Image.network(
+                              '${dados?['current']['condition']['icon']}'),
+                          width: 100,
+                          height: 100,
+                        ),
+                        Text(dados?['current']['condition']['text'],
+                            style: titleStyle),
+                        Text("${dados!['current']['temp_c']}°C",
+                            style: degreeStyle33),
+                      ],
                     ),
-                    Container(
-                      height: 70,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Image.asset(
-                                'images/humidity.png',
-                                height: 30,
-                                width: 30,
-                              ),
-                              Text("HUMIDITY", style: textTemperatureStyle),
-                              Text("${dados['current']['humidity']}%",
-                                  style: textTemperatureStyle),
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Image.asset(
-                                'images/wind.png',
-                                height: 30,
-                                width: 30,
-                              ),
-                              Text("WIND", style: textTemperatureStyle),
-                              Text("${dados['current']['wind_kph']}Km/h",
-                                  style: textTemperatureStyle),
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Image.asset(
-                                'images/feels_like.png',
-                                height: 30,
-                                width: 30,
-                              ),
-                              Text("FEELS LIKE", style: textTemperatureStyle),
-                              Text("${dados['current']['feelslike_c']}°",
-                                  style: textTemperatureStyle),
-                            ],
-                          ),
-                        ],
-                      ),
+                  ),
+                  Container(
+                    height: 70,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Image.asset(
+                              'images/humidity.png',
+                              height: 30,
+                              width: 30,
+                            ),
+                            Text("HUMIDITY", style: textTemperatureStyle),
+                            Text("${dados['current']['humidity']}%",
+                                style: textTemperatureStyle),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Image.asset(
+                              'images/wind.png',
+                              height: 30,
+                              width: 30,
+                            ),
+                            Text("WIND", style: textTemperatureStyle),
+                            Text("${dados['current']['wind_kph']}Km/h",
+                                style: textTemperatureStyle),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Image.asset(
+                              'images/feels_like.png',
+                              height: 30,
+                              width: 30,
+                            ),
+                            Text("FEELS LIKE", style: textTemperatureStyle),
+                            Text("${dados['current']['feelslike_c']}°",
+                                style: textTemperatureStyle),
+                          ],
+                        ),
+                      ],
                     ),
-                    Container(
-                      height: 100,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: forecastday
-                            .map(
-                              (item) => ForecastDay(
-                                item['time_epoch']!,
-                                item['condition']['icon']!,
-                                item['temp_c'],
-                              ),
-                            )
-                            .toList(),
-                      ),
+                  ),
+                  Container(
+                    height: 100,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: forecastday
+                          .where((item) => DateTime.parse(item['time']).hour >= DateTime.now().hour)
+                          .map(
+                            (item) => ForecastDay(
+                              item['time']!,
+                              item['condition']['icon']!,
+                              item['temp_c'],
+                            ),
+                          )
+                          .toList(),
                     ),
-                  ],
-                ),
-              );
-            }),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
 class ForecastDay extends StatelessWidget {
-  int timeEpoch;
+  String timeEpoch;
   String image;
   double temperature;
   String? hour;
 
   ForecastDay(this.timeEpoch, this.image, this.temperature) {
-    var data = DateTime.fromMillisecondsSinceEpoch(timeEpoch);
+    var data = DateTime.parse(timeEpoch);
     hour = data.hour.toString();
   }
 
