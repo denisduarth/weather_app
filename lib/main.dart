@@ -62,8 +62,8 @@ class WheaterApp extends StatelessWidget {
                           Container(
                             child: Image.network(
                                 '${dados?['current']['condition']['icon']}'),
-                            width: 96,
-                            height: 96,
+                            width: 100,
+                            height: 100,
                           ),
                           Text(dados?['current']['condition']['text'],
                               style: titleStyle),
@@ -126,8 +126,8 @@ class WheaterApp extends StatelessWidget {
                         children: forecastday
                             .map(
                               (item) => ForecastDay(
-                                item['time_epoch'],
-                                'ensolaradokkk',
+                                item['time_epoch']!,
+                                item['condition']['icon']!,
                                 item['temp_c'],
                               ),
                             )
@@ -166,11 +166,11 @@ class ForecastDay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                hour!,
+                '${hour!}:00',
                 style: topTextStyle,
               ),
-              Image.asset(
-                'images/$image.png',
+              Image.network(
+                image,
                 height: 36,
                 width: 36,
               ),
